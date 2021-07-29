@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.parismeow.jetdoc">
+    <!-- Used for accessing network -->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <!-- Used for fetching document from storage -->
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
 
     <application
         android:allowBackup="true"
