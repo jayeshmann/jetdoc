@@ -2,7 +2,6 @@ package com.parismeow.jetdoc
 
 import android.content.res.Configuration
 import android.net.Uri
-import android.provider.DocumentsContract
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.*
@@ -12,30 +11,23 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.core.net.toFile
 import androidx.documentfile.provider.DocumentFile
-import com.parismeow.jetdoc.data.UploadAPI
 import com.parismeow.jetdoc.ui.theme.JetDocTheme
-import okhttp3.MediaType
-import okhttp3.MultipartBody
-import okhttp3.RequestBody
 
 @Composable
-fun MainScreen(modifier: Modifier = Modifier) {
+fun MainScreen(docItem: Uri, onDocItemChange: (Uri) -> Unit, onDocUpload: () -> Unit) {
     val scaffoldState = rememberScaffoldState()
-    val (fileUri, setFile) = remember { mutableStateOf<Uri>(Uri.EMPTY) }
+
     val fileLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.OpenDocument(),
         onResult = {
-            setFile(it)
+            onDocItemChange(it)
         })
     Scaffold(
         scaffoldState = scaffoldState,
@@ -62,31 +54,29 @@ fun MainScreen(modifier: Modifier = Modifier) {
                 }
             }
         }) { innerPadding ->
-        if (fileUri != Uri.EMPTY) {
-            BodyContent(modifier = Modifier.padding(innerPadding), fileUri = fileUri)
+        if (docItem != Uri.EMPTY) {
+            BodyContent(
+                modifier = Modifier.padding(innerPadding),
+                docItem = docItem,
+                onDocUpload = onDocUpload
+            )
         }
     }
 }
 
 @Composable
-fun BodyContent(modifier: Modifier = Modifier, fileUri: Uri) {
+fun BodyContent(modifier: Modifier = Modifier, docItem: Uri, onDocUpload: () -> Unit) {
     Column(modifier = modifier) {
-        OneFile(fileUri = fileUri)
+        OneFile(docItem = docItem, onDocUpload = onDocUpload)
         Divider(color = MaterialTheme.colors.secondary)
     }
 }
 
 @Composable
-fun OneFile(modifier: Modifier = Modifier, fileUri: Uri) {
+fun OneFile(modifier: Modifier = Modifier, docItem: Uri, onDocUpload: () -> Unit) {
     val context = LocalContext.current
-    val uploadAPI = UploadAPI()
-
-    val file = DocumentFile.fromSingleUri(context, fileUri)
+    val file = DocumentFile.fromSingleUri(context, docItem)
     if (file != null) {
-
-        /*val fileBody = RequestBody.create(MediaType.parse(file.type!!), file!!)
-        val body = MultipartBody.Builder().addFormDataPart("name", file.name!!)
-            .addFormDataPart("sampleFile", file.name!!, fileBody).build()*/
         Row(
             modifier = modifier
                 .fillMaxWidth()
@@ -105,7 +95,7 @@ fun OneFile(modifier: Modifier = Modifier, fileUri: Uri) {
 
                     )
             }
-            IconButton(onClick = { /*uploadAPI.uploadDoc(body)*/ }) {
+            IconButton(onClick = { onDocUpload() }) {
                 Icon(
                     imageVector = Icons.Outlined.UploadFile,
                     contentDescription = "Upload File"
@@ -116,7 +106,7 @@ fun OneFile(modifier: Modifier = Modifier, fileUri: Uri) {
 }
 
 
-@Preview(uiMode = Configuration.UI_MODE_NIGHT_NO, showBackground = true)
+/*@Preview(uiMode = Configuration.UI_MODE_NIGHT_NO, showBackground = true)
 @Composable
 fun LightPreview() {
     JetDocTheme {
@@ -130,12 +120,4 @@ fun DarkPreview() {
     JetDocTheme {
         MainScreen()
     }
-}
-
-@Preview(uiMode = Configuration.UI_MODE_NIGHT_NO, showBackground = true)
-@Composable
-fun LightBodyPreview() {
-    JetDocTheme {
-        OneFile(fileUri = Uri.EMPTY)
-    }
-}
+}*/
