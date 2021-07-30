@@ -1,6 +1,6 @@
 package com.parismeow.jetdoc
 
-import android.content.res.Configuration
+import android.content.Context
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -15,13 +15,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.documentfile.provider.DocumentFile
-import com.parismeow.jetdoc.ui.theme.JetDocTheme
+import kotlin.reflect.KFunction1
 
 @Composable
-fun MainScreen(docItem: Uri, onDocItemChange: (Uri) -> Unit, onDocUpload: () -> Unit) {
+fun MainScreen(docItem: Uri, onDocItemChange: (Uri) -> Unit, onDocUpload: (Context) -> Unit) {
     val scaffoldState = rememberScaffoldState()
 
     val fileLauncher = rememberLauncherForActivityResult(
@@ -65,7 +64,7 @@ fun MainScreen(docItem: Uri, onDocItemChange: (Uri) -> Unit, onDocUpload: () -> 
 }
 
 @Composable
-fun BodyContent(modifier: Modifier = Modifier, docItem: Uri, onDocUpload: () -> Unit) {
+fun BodyContent(modifier: Modifier = Modifier, docItem: Uri, onDocUpload: (Context) -> Unit) {
     Column(modifier = modifier) {
         OneFile(docItem = docItem, onDocUpload = onDocUpload)
         Divider(color = MaterialTheme.colors.secondary)
@@ -73,7 +72,7 @@ fun BodyContent(modifier: Modifier = Modifier, docItem: Uri, onDocUpload: () -> 
 }
 
 @Composable
-fun OneFile(modifier: Modifier = Modifier, docItem: Uri, onDocUpload: () -> Unit) {
+fun OneFile(modifier: Modifier = Modifier, docItem: Uri, onDocUpload: (Context) -> Unit) {
     val context = LocalContext.current
     val file = DocumentFile.fromSingleUri(context, docItem)
     if (file != null) {
@@ -95,7 +94,7 @@ fun OneFile(modifier: Modifier = Modifier, docItem: Uri, onDocUpload: () -> Unit
 
                     )
             }
-            IconButton(onClick = { onDocUpload() }) {
+            IconButton(onClick = { onDocUpload(context) }) {
                 Icon(
                     imageVector = Icons.Outlined.UploadFile,
                     contentDescription = "Upload File"

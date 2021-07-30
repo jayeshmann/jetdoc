@@ -8,3 +8,4 @@ dependencyResolutionManagement {
 }
 rootProject.name = "JetDoc"
 include ':app'
+include ':jetdoc'
