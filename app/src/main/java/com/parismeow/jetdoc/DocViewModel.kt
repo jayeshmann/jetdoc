@@ -18,12 +18,16 @@ class DocViewModel : ViewModel() {
         docItem = docUri
     }
 
+    fun onDocDone() {
+        docItem = Uri.EMPTY
+    }
 
     fun onDocUpload(context: Context, fileName: String) {
-        val docRef = FirebaseStorage.getInstance().reference.child("uploads/$fileName.pdf")
+        val docRef = FirebaseStorage.getInstance().reference.child("uploads/$fileName")
         docRef.putFile(docItem)
             .addOnSuccessListener {
                 println("File Uploaded")
+                onDocDone()
             }
             .addOnFailureListener {
                 println("File upload failed")
@@ -33,6 +37,7 @@ class DocViewModel : ViewModel() {
                 val progress = ((100 * it.bytesTransferred) / it.totalByteCount).toInt()
                 println("Uploading...$progress%")
             }
+
     }
 
 }
