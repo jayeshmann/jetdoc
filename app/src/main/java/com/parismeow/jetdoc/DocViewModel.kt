@@ -6,7 +6,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
-import com.google.firebase.storage.FirebaseStorage
+import com.google.firebase.ktx.Firebase
+import com.google.firebase.storage.ktx.storage
 
 class DocViewModel : ViewModel() {
 
@@ -23,7 +24,8 @@ class DocViewModel : ViewModel() {
     }
 
     fun onDocUpload(context: Context, fileName: String) {
-        val docRef = FirebaseStorage.getInstance().reference.child("uploads/$fileName")
+
+        val docRef = Firebase.storage.reference.child("uploads/$fileName")
         docRef.putFile(docItem)
             .addOnSuccessListener {
                 println("File Uploaded")
