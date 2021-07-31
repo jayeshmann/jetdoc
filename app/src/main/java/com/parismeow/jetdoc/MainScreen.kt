@@ -4,6 +4,7 @@ import android.content.Context
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -11,30 +12,56 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.documentfile.provider.DocumentFile
+import kotlinx.coroutines.launch
 import kotlin.reflect.KFunction1
 
 @Composable
 fun MainScreen(
     docItem: Uri,
     onDocItemChange: (Uri) -> Unit,
-    onDocUpload: (Context, String) -> Unit
+    onDocUpload: (Context, String, (Int) -> Unit) -> Unit,
+    snackbarMsg: String,
+    hideSnackbar: ()-> Unit
 ) {
-    val scaffoldState = rememberScaffoldState()
-
+    val snackbarHostState = remember { SnackbarHostState() }
+    val scaffoldState = rememberScaffoldState(snackbarHostState = snackbarHostState)
     val fileLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.OpenDocument(),
         onResult = {
             onDocItemChange(it)
         })
+    val coroutineScope = rememberCoroutineScope()
+    if (snackbarMsg.isNotBlank()) {
+        LaunchedEffect(key1 = docItem, block = {
+            coroutineScope.launch {
+                snackbarHostState.showSnackbar(message = snackbarMsg)
+                hideSnackbar()
+            }
+        })
+    }
+
     Scaffold(
         scaffoldState = scaffoldState,
         topBar = { TopAppBar(title = { Text(text = "JetDoc") }) },
+        snackbarHost = {
+            // reuse default SnackbarHost to have default animation and timing handling
+            SnackbarHost(it) { data ->
+                // custom snackbar with the custom border
+                Snackbar(
+                    modifier = Modifier.border(2.dp, MaterialTheme.colors.secondary),
+                    snackbarData = data
+                )
+            }
+        },
         floatingActionButton = {
             FloatingActionButton(onClick = { fileLauncher.launch(arrayOf("application/pdf")) }) {
                 Icon(imageVector = Icons.Outlined.Add, contentDescription = "Add")
@@ -71,7 +98,7 @@ fun MainScreen(
 fun BodyContent(
     modifier: Modifier = Modifier,
     docItem: Uri,
-    onDocUpload: (Context, String) -> Unit
+    onDocUpload: (Context, String, (Int) -> Unit) -> Unit
 ) {
     Column(modifier = modifier) {
         OneFile(docItem = docItem, onDocUpload = onDocUpload)
@@ -80,7 +107,11 @@ fun BodyContent(
 }
 
 @Composable
-fun OneFile(modifier: Modifier = Modifier, docItem: Uri, onDocUpload: (Context, String) -> Unit) {
+fun OneFile(
+    modifier: Modifier = Modifier,
+    docItem: Uri,
+    onDocUpload: (Context, String, (Int) -> Unit) -> Unit
+) {
     val context = LocalContext.current
     val file = DocumentFile.fromSingleUri(context, docItem)
     if (file != null) {
@@ -101,7 +132,13 @@ fun OneFile(modifier: Modifier = Modifier, docItem: Uri, onDocUpload: (Context, 
                         .weight(1f),
 
                     )
-                IconButton(onClick = { onDocUpload(context, file.name!!) }) {
+                IconButton(
+                    onClick = {
+                        onDocUpload(context, file.name!!) {
+                            println("Progress: $it%")
+                        }
+                    }
+                ) {
                     Icon(
                         imageVector = Icons.Outlined.UploadFile,
                         contentDescription = "Upload File"

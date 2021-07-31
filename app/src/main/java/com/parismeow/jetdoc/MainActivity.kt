@@ -55,6 +55,8 @@ fun MainActivityScreen(docViewModel: DocViewModel) {
     MainScreen(
         docItem = docViewModel.docItem,
         onDocItemChange = docViewModel::onDocItemChange,
-        onDocUpload = docViewModel::onDocUpload
+        onDocUpload = docViewModel::onDocUpload,
+        snackbarMsg = docViewModel.snackbarMsg,
+        hideSnackbar = docViewModel::hideSnackbar
     )
 }
