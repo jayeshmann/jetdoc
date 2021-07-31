@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "740452489949",
+    "project_id": "jetdoc-2a0a0",
+    "storage_bucket": "jetdoc-2a0a0.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:740452489949:android:074406edc8963daa571934",
+        "android_client_info": {
+          "package_name": "com.parismeow.jetdoc"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "740452489949-6ml5ii8i16cg0ksmeljkhp2tabsla4qc.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBn52Ar4QZXXUnT2Iazr9kHy4cTViH5VDk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "740452489949-6ml5ii8i16cg0ksmeljkhp2tabsla4qc.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

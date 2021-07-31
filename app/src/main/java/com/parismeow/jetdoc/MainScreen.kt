@@ -20,7 +20,11 @@ import androidx.documentfile.provider.DocumentFile
 import kotlin.reflect.KFunction1
 
 @Composable
-fun MainScreen(docItem: Uri, onDocItemChange: (Uri) -> Unit, onDocUpload: (Context) -> Unit) {
+fun MainScreen(
+    docItem: Uri,
+    onDocItemChange: (Uri) -> Unit,
+    onDocUpload: (Context, String) -> Unit
+) {
     val scaffoldState = rememberScaffoldState()
 
     val fileLauncher = rememberLauncherForActivityResult(
@@ -64,7 +68,11 @@ fun MainScreen(docItem: Uri, onDocItemChange: (Uri) -> Unit, onDocUpload: (Conte
 }
 
 @Composable
-fun BodyContent(modifier: Modifier = Modifier, docItem: Uri, onDocUpload: (Context) -> Unit) {
+fun BodyContent(
+    modifier: Modifier = Modifier,
+    docItem: Uri,
+    onDocUpload: (Context, String) -> Unit
+) {
     Column(modifier = modifier) {
         OneFile(docItem = docItem, onDocUpload = onDocUpload)
         Divider(color = MaterialTheme.colors.secondary)
@@ -72,7 +80,7 @@ fun BodyContent(modifier: Modifier = Modifier, docItem: Uri, onDocUpload: (Conte
 }
 
 @Composable
-fun OneFile(modifier: Modifier = Modifier, docItem: Uri, onDocUpload: (Context) -> Unit) {
+fun OneFile(modifier: Modifier = Modifier, docItem: Uri, onDocUpload: (Context, String) -> Unit) {
     val context = LocalContext.current
     val file = DocumentFile.fromSingleUri(context, docItem)
     if (file != null) {
@@ -83,8 +91,8 @@ fun OneFile(modifier: Modifier = Modifier, docItem: Uri, onDocUpload: (Context) 
                 .padding(8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Icon(imageVector = Icons.Outlined.PictureAsPdf, contentDescription = "PDF")
             file.name?.let { it1 ->
+                Icon(imageVector = Icons.Outlined.PictureAsPdf, contentDescription = "PDF")
                 Text(
                     text = it1,
                     style = MaterialTheme.typography.body2,
@@ -93,12 +101,12 @@ fun OneFile(modifier: Modifier = Modifier, docItem: Uri, onDocUpload: (Context) 
                         .weight(1f),
 
                     )
-            }
-            IconButton(onClick = { onDocUpload(context) }) {
-                Icon(
-                    imageVector = Icons.Outlined.UploadFile,
-                    contentDescription = "Upload File"
-                )
+                IconButton(onClick = { onDocUpload(context, file.name!!) }) {
+                    Icon(
+                        imageVector = Icons.Outlined.UploadFile,
+                        contentDescription = "Upload File"
+                    )
+                }
             }
         }
     }
