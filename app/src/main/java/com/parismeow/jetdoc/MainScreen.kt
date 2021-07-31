@@ -4,6 +4,7 @@ import android.content.Context
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
@@ -11,10 +12,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -28,16 +26,24 @@ import kotlin.reflect.KFunction1
 fun MainScreen(
     docItem: Uri,
     onDocItemChange: (Uri) -> Unit,
-    onDocUpload: (Context, String, (Int) -> Unit) -> Unit,
+    onDocUpload: (Context, String, (Float) -> Unit) -> Unit,
     snackbarMsg: String,
-    hideSnackbar: ()-> Unit
+    hideSnackbar: () -> Unit,
+    uploadProgress: Float,
+    resetProgress: () -> Unit
 ) {
+    val animatedProgress by animateFloatAsState(
+        targetValue = 1.05F * uploadProgress,
+        animationSpec = ProgressIndicatorDefaults.ProgressAnimationSpec
+    )
     val snackbarHostState = remember { SnackbarHostState() }
     val scaffoldState = rememberScaffoldState(snackbarHostState = snackbarHostState)
     val fileLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.OpenDocument(),
         onResult = {
-            onDocItemChange(it)
+            if (it != null) {
+                onDocItemChange(it)
+            }
         })
     val coroutineScope = rememberCoroutineScope()
     if (snackbarMsg.isNotBlank()) {
@@ -84,6 +90,14 @@ fun MainScreen(
                 }
             }
         }) { innerPadding ->
+        LinearProgressIndicator(
+            modifier = Modifier
+                .padding(innerPadding)
+                .fillMaxWidth(),
+            progress = animatedProgress,
+            color = MaterialTheme.colors.primary,
+        )
+        Spacer(Modifier.requiredHeight(30.dp))
         if (docItem != Uri.EMPTY) {
             BodyContent(
                 modifier = Modifier.padding(innerPadding),
@@ -98,7 +112,7 @@ fun MainScreen(
 fun BodyContent(
     modifier: Modifier = Modifier,
     docItem: Uri,
-    onDocUpload: (Context, String, (Int) -> Unit) -> Unit
+    onDocUpload: (Context, String, (Float) -> Unit) -> Unit
 ) {
     Column(modifier = modifier) {
         OneFile(docItem = docItem, onDocUpload = onDocUpload)
@@ -110,7 +124,7 @@ fun BodyContent(
 fun OneFile(
     modifier: Modifier = Modifier,
     docItem: Uri,
-    onDocUpload: (Context, String, (Int) -> Unit) -> Unit
+    onDocUpload: (Context, String, (Float) -> Unit) -> Unit
 ) {
     val context = LocalContext.current
     val file = DocumentFile.fromSingleUri(context, docItem)

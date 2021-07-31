@@ -16,6 +16,7 @@ class DocViewModel : ViewModel() {
         private set
 
     var snackbarMsg by mutableStateOf<String>("")
+    var progress by mutableStateOf<Float>(0.0F)
 
     fun onDocItemChange(docUri: Uri) {
         docItem = docUri
@@ -25,14 +26,19 @@ class DocViewModel : ViewModel() {
         docItem = Uri.EMPTY
     }
 
-    fun hideSnackbar(){
+    fun resetProgress() {
+        progress = 0.0F
+    }
+
+    fun hideSnackbar() {
         snackbarMsg = ""
+        resetProgress()
     }
 
     fun onDocUpload(
         context: Context,
         fileName: String,
-        onProgress: (Int) -> Unit
+        onProgress: (Float) -> Unit
     ) {
         val docRef = Firebase.storage.reference.child("uploads/$fileName")
         docRef.putFile(docItem)
@@ -48,9 +54,8 @@ class DocViewModel : ViewModel() {
 
             }
             .addOnProgressListener {
-                val progress = ((100 * it.bytesTransferred) / it.totalByteCount).toInt()
+                progress = (it.bytesTransferred.toFloat() / it.totalByteCount.toFloat())
                 println("Uploading...$progress%")
-                onProgress(progress)
             }
     }
 
